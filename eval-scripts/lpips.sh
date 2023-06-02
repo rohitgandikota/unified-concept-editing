@@ -1,0 +1,1 @@
+python eval-scripts/lpips_eval.py --original_path '/disk/u/rohit/www/closed_form/limitTest_Erase1/holdout/original/' --csv_path '/disk/u/rohit/erase-closed/data/holdout100_prompts.csv' --save_path '/disk/u/rohit/www/closed_form/limitTest_Erase1/holdout/' --edited_path '/disk/u/rohit/www/closed_form/limitTest_Erase1/holdout/erasing-1-with-100-preservation'
