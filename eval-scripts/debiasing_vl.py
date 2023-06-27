@@ -22,18 +22,23 @@ def get_M(embeddings, S):
         M  += get_A(embeddings[s[0]], embeddings[s[1]])
     return M / len(S)
 
-def generate_images(model_name, prompts_path, debias_concepts, save_path, device='cuda:0', guidance_scale = 7.5, image_size=512, ddim_steps=100, num_samples=10, from_case=0, till_case=1000000):
+def generate_images(model_name, prompts_path, debias_concepts, save_path, device='cuda:0', guidance_scale = 7.5, image_size=512, ddim_steps=100, num_samples=10, from_case=0, till_case=1000000, base='1.4'):
     
-    # 1. Load the autoencoder model which will be used to decode the latents into image space.
-    vae = AutoencoderKL.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="vae")
+    if base == '1.4':
+        model_version = "CompVis/stable-diffusion-v1-4"
+    elif base == '2.1':
+        model_version = 'stabilityai/stable-diffusion-2-1-base'
+    else:
+        model_version = "CompVis/stable-diffusion-v1-4"
+    vae = AutoencoderKL.from_pretrained(model_version, subfolder="vae")
 
     # 2. Load the tokenizer and text encoder to tokenize and encode the text.
-    tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
-    text_encoder = CLIPTextModel.from_pretrained("openai/clip-vit-large-patch14")
+    tokenizer = CLIPTokenizer.from_pretrained(model_version, subfolder="tokenizer")
+    text_encoder = CLIPTextModel.from_pretrained(model_version, subfolder="text_encoder")
 
     # 3. The UNet model for generating the latents.
 #     name = 'compvis-word_VanGogh-method_xattn-sg_3-ng_1-iter_1000-lr_1e-05'
-    unet = UNet2DConditionModel.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="unet")
+    unet = UNet2DConditionModel.from_pretrained(model_version, subfolder="unet")
     if model_name != 'original':
         model_path = f'models/{model_name}'
         unet.load_state_dict(torch.load(model_path))
@@ -69,9 +74,9 @@ def generate_images(model_name, prompts_path, debias_concepts, save_path, device
 
     # Compute Calibration Matrix
     M =  get_M(candidate_embeddings, S)
-    G = 500 * M + np.eye(M.shape[0]) 
+    G = 500.0 * M + np.eye(M.shape[0]) 
     P = np.linalg.inv(G)
-    P = torch.tensor(P).cuda()
+    P = torch.tensor(P).to(device)
 
 
     for _, row in df.iterrows():
@@ -155,9 +160,10 @@ if __name__=='__main__':
                     description = 'Generate Images using Diffusers Code')
     parser.add_argument('--model_name', help='name of model', type=str, required=True)
     parser.add_argument('--prompts_path', help='path to csv file with prompts', type=str, required=True)
-    parser.add_argument('--debias_concepts', help='Concepts to debias', type=str, required=True)
+    parser.add_argument('--debias_concepts', help='Concepts to debias', type=str, required=False, default = '')
     parser.add_argument('--save_path', help='folder where to save images', type=str, required=True)
     parser.add_argument('--device', help='cuda device to run on', type=str, required=False, default='cuda:0')
+    parser.add_argument('--base', help='version of stable diffusion to run', type=str, required=False, default='2.1')
     parser.add_argument('--guidance_scale', help='guidance to run eval', type=float, required=False, default=7.5)
     parser.add_argument('--image_size', help='image size used to train', type=int, required=False, default=512)
     parser.add_argument('--till_case', help='continue generating from case_number', type=int, required=False, default=1000000)
@@ -171,6 +177,9 @@ if __name__=='__main__':
     save_path = args.save_path
     debias_concepts = args.debias_concepts.split(',')
     debias_concepts = [b.strip() for b in debias_concepts]
+    if debias_concepts == ['']:
+        print('Using default train list')
+        debias_concepts = ['Actor', 'Architect', 'Audiologist', 'Author', 'Baker', 'Barber', 'Blacksmith', 'Bricklayer', 'Bus Driver', 'Butcher', 'Chef', 'Chemist', 'Cleaner', 'Coach', 'Comedian', 'Computer Programmer', 'Construction Worker', 'Consultant', 'Counselor', 'Dancer', 'Dentist', 'Designer', 'Dietitian', 'DJ', 'Doctor', 'Driver', 'Economist', 'Electrician', 'Engineer', 'Entrepreneur', 'Farmer', 'Florist', 'Graphic Designer', 'Hairdresser', 'Historian', 'Journalist', 'Judge', 'Lawyer', 'Librarian', 'Magician', 'Makeup Artist', 'Mathematician', 'Marine Biologist', 'Mechanic', 'Model', 'Musician', 'Nanny', 'Nurse', 'Optician', 'Painter', 'Pastry Chef', 'Pediatrician', 'Photographer', 'Plumber', 'Police Officer', 'Politician', 'Professor', 'Psychologist', 'Real Estate Agent', 'Receptionist', 'Recruiter', 'Researcher', 'Sailor', 'Salesperson', 'Surveyor', 'Singer', 'Social Worker', 'Software Developer', 'Statistician', 'Surgeon', 'Teacher', 'Technician', 'Therapist', 'Tour Guide', 'Translator', 'Vet', 'Videographer', 'Waiter', 'Writer', 'Zoologist']
     device = args.device
     guidance_scale = args.guidance_scale
     image_size = args.image_size
@@ -179,4 +188,4 @@ if __name__=='__main__':
     from_case = args.from_case
     till_case = args.till_case
     generate_images(model_name=model_name, prompts_path=prompts_path,debias_concepts=debias_concepts, save_path=save_path, device=device,
-                    guidance_scale = guidance_scale, image_size=image_size, ddim_steps=ddim_steps, num_samples=num_samples,from_case=from_case, till_case=till_case)
+                    guidance_scale = guidance_scale, image_size=image_size, ddim_steps=ddim_steps, num_samples=num_samples,from_case=from_case, till_case=till_case, base=args.base)
