@@ -56,8 +56,8 @@ wandb.init(project='DEMISTIFY_TIME_gender_bias_test', config={
 clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-perc_per_seed = []
-delta_p_per_seed = []
+all_perc = []
+all_delta_p = []
 all_perc_per_profession = defaultdict(list)
 all_delta_p_per_profession = defaultdict(list)
 
@@ -90,8 +90,8 @@ if do_test:
             all_perc_per_profession[curr_item['profession']].append(perc_of_f)
             all_delta_p_per_profession[curr_item['profession']].append(delta_p)
 
-        perc_per_seed.append(np.mean(perc_per_profession_for_curr_seed))
-        delta_p_per_seed.append(np.mean(delta_p_per_profession_for_curr_seed))
+        all_perc.append(np.mean(perc_per_profession_for_curr_seed))
+        all_delta_p.append(np.mean(delta_p_per_profession_for_curr_seed))
 else:
     for curr_item in test_set:
         images = []
@@ -113,8 +113,10 @@ else:
         perc_of_f = n_female / num_seeds
         delta_p = np.abs(0.5 - perc_of_f) / 0.5
         # here it's per profession, not seed, it's not possible to measure per seed...
-        perc_per_seed.append(perc_of_f)
-        delta_p_per_seed.append(delta_p)
+        all_perc.append(perc_of_f)
+        all_perc_per_profession[curr_item['profession']].append(perc_of_f)
+        all_delta_p.append(delta_p)
+        all_delta_p_per_profession[curr_item['profession']].append(delta_p)
 
 df = pd.DataFrame.from_dict(all_perc_per_profession)
 wandb.log({"all_perc_per_profession": wandb.Table(dataframe=df)})
@@ -133,7 +135,7 @@ for k, v in all_delta_p_per_profession.items():
 df = pd.DataFrame.from_dict(mean_delta_p_per_profession)
 wandb.log({"mean_delta_p_per_profession": wandb.Table(dataframe=df)})
 
-wandb.summary['perc_of_f'] = np.mean(perc_per_seed)
-wandb.summary['perc_of_f_std'] = np.std(perc_per_seed)
-wandb.summary['delta_p'] = np.mean(delta_p_per_seed)
-wandb.summary['delta_p_std'] = np.std(delta_p_per_seed)
+wandb.summary['perc_of_f'] = np.mean(all_perc)
+wandb.summary['perc_of_f_std'] = np.std(all_perc)
+wandb.summary['delta_p'] = np.mean(all_delta_p)
+wandb.summary['delta_p_std'] = np.std(all_delta_p)
