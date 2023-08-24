@@ -17,12 +17,18 @@ pip install -r requirements.txt
 After installation, follow these instructions to train a custom UCE model:
 ### Erasing
 To erase concepts (e.g. "Kelly Mckernan, Sarah Anderson")
-`python train-scripts/train_erase.py --concepts 'Kelly Mckernan, Sarah Anderson' --guided_concept 'art' --device 'cuda:0' --concept_type 'art' `
+```
+python train-scripts/train_erase.py --concepts 'Kelly Mckernan, Sarah Anderson' --guided_concept 'art' --device 'cuda:0' --concept_type 'art'
+```
 
 ### Debiasing
 To debias concepts (e.g. "Doctor, Nurse, Carpenter") against attributes (e.g. "Male, Female") 
-`python train-scripts/train_debias.py --concept 'Doctor, Nurse, Carpenter' --attributes 'male, female' --device 'cuda:0' `
+```
+python train-scripts/train_debias.py --concept 'Doctor, Nurse, Carpenter' --attributes 'male, female' --device 'cuda:0'
+```
 
 ### Moderating
 To moderate concepts (e.g. "violence, nudity, harm")
-`python train-scripts/train_erase.py --concepts 'violence, nudity, harm' --device 'cuda:0' --concept_type 'unsafe' `
+```
+python train-scripts/train_erase.py --concepts 'violence, nudity, harm' --device 'cuda:0' --concept_type 'unsafe'
+```
