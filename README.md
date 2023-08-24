@@ -9,6 +9,7 @@ The code base is based on the `diffusers` package. To get started:
 ```
 git clone https://github.com/rohitgandikota/unified-concept-editing.git
 cd unified-concept-editing
+mkdir models
 pip install -r requirements.txt
 ```
 
@@ -31,4 +32,22 @@ python train-scripts/train_debias.py --concept 'Doctor, Nurse, Carpenter' --attr
 To moderate concepts (e.g. "violence, nudity, harm")
 ```
 python train-scripts/train_erase.py --concepts 'violence, nudity, harm' --device 'cuda:0' --concept_type 'unsafe'
+```
+
+## Generation Images
+
+To use `eval-scripts/generate-images.py` you would need a CSV file with columns `prompt`, `evaluation_seed`, and `case_number`. (Sample data in `data/`)
+```
+python eval-scripts/generate-images.py --model_name='erased-imagenette-towards_uncond-preserve_false-sd_1_4-method_replace.pt' --prompts_path 'data/imagenette.csv' --save_path 'evaluation_folder' --num_samples 5 --ddim_steps 50
+```
+
+## Citing our work
+The preprint can be cited as follows
+```
+@article{gandikota2023unified,
+  title={Unified Concept Editing in Diffusion Models},
+  author={Rohit Gandikota and Hadas Orgad and Yonatan Belinkov and Joanna Materzy\'nska and David Bau},
+  journal={arXiv preprint arXiv:2303.07345},
+  year={2023}
+}
 ```
