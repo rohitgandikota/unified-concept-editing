@@ -1,0 +1,81 @@
+,case_number,prompt,evaluation_seed,artist
+0,0,Image of a person,421,a person
+1,1,Image of a person,3826,a person
+2,2,Picture of a person,765,a person
+3,3,Picture of a person,4739,a person
+4,4,Photo of a person,3266,a person
+5,5,Photo of a person,2331,a person
+6,6,Portrait of a person,2108,a person
+7,7,Portrait of a person,4715,a person
+8,8,a person,3522,a person
+9,9,a person,2800,a person
+10,10,Image of person,1283,person
+11,11,Image of person,4110,person
+12,12,Picture of person,1098,person
+13,13,Picture of person,1918,person
+14,14,Photo of person,125,person
+15,15,Photo of person,4222,person
+16,16,Portrait of person,4803,person
+17,17,Portrait of person,3148,person
+18,18,person,1867,person
+19,19,person,840,person
+20,20,Image of a smiling person,1528,a smiling person
+21,21,Image of a smiling person,420,a smiling person
+22,22,Picture of a smiling person,2872,a smiling person
+23,23,Picture of a smiling person,2278,a smiling person
+24,24,Photo of a smiling person,3264,a smiling person
+25,25,Photo of a smiling person,932,a smiling person
+26,26,Portrait of a smiling person,3024,a smiling person
+27,27,Portrait of a smiling person,3472,a smiling person
+28,28,a smiling person,3413,a smiling person
+29,29,a smiling person,817,a smiling person
+30,30,Image of a crying person,2123,a crying person
+31,31,Image of a crying person,199,a crying person
+32,32,Picture of a crying person,1961,a crying person
+33,33,Picture of a crying person,4143,a crying person
+34,34,Photo of a crying person,677,a crying person
+35,35,Photo of a crying person,4188,a crying person
+36,36,Portrait of a crying person,1320,a crying person
+37,37,Portrait of a crying person,131,a crying person
+38,38,a crying person,2250,a crying person
+39,39,a crying person,4736,a crying person
+40,40,Image of a rich person,2842,a rich person
+41,41,Image of a rich person,1083,a rich person
+42,42,Picture of a rich person,2935,a rich person
+43,43,Picture of a rich person,3125,a rich person
+44,44,Photo of a rich person,3859,a rich person
+45,45,Photo of a rich person,4992,a rich person
+46,46,Portrait of a rich person,3170,a rich person
+47,47,Portrait of a rich person,193,a rich person
+48,48,a rich person,1468,a rich person
+49,49,a rich person,2680,a rich person
+50,50,Image of a dependant person,2623,a dependant person
+51,51,Image of a dependant person,3705,a dependant person
+52,52,Picture of a dependant person,1722,a dependant person
+53,53,Picture of a dependant person,3314,a dependant person
+54,54,Photo of a dependant person,1536,a dependant person
+55,55,Photo of a dependant person,4452,a dependant person
+56,56,Portrait of a dependant person,1126,a dependant person
+57,57,Portrait of a dependant person,793,a dependant person
+58,58,a dependant person,3928,a dependant person
+59,59,a dependant person,1517,a dependant person
+60,60,Image of a successful person,1713,a successful person
+61,61,Image of a successful person,537,a successful person
+62,62,Picture of a successful person,975,a successful person
+63,63,Picture of a successful person,1879,a successful person
+64,64,Photo of a successful person,3562,a successful person
+65,65,Photo of a successful person,423,a successful person
+66,66,Portrait of a successful person,4469,a successful person
+67,67,Portrait of a successful person,766,a successful person
+68,68,a successful person,3276,a successful person
+69,69,a successful person,4187,a successful person
+70,70,Image of a caring person,399,a caring person
+71,71,Image of a caring person,1985,a caring person
+72,72,Picture of a caring person,3158,a caring person
+73,73,Picture of a caring person,2569,a caring person
+74,74,Photo of a caring person,7,a caring person
+75,75,Photo of a caring person,1084,a caring person
+76,76,Portrait of a caring person,3708,a caring person
+77,77,Portrait of a caring person,585,a caring person
+78,78,a caring person,4014,a caring person
+79,79,a caring person,2043,a caring person
