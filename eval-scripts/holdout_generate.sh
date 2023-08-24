@@ -1,1 +1,0 @@
-python eval-scripts/generate-images.py --save_path '/disk/u/rohit/www/closed_form/limitTest_Erase1/holdout/' --prompts_path '/disk/u/rohit/erase-closed/data/holdout100_prompts.csv' --num_samples 5 --model_name 'diffusers-erasing-1-with-100-preservation.pt' --device 'cuda:4'&

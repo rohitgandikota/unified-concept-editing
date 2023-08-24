@@ -1,1 +1,0 @@
-python eval-scripts/generate-images.py --model_name 'unbiased_doctor_gender_averaged.pt' --num_samples 10 --device 'cuda:7' --prompts_path '/disk/u/rohit/erase-closed/data/profession1000_prompts.csv' --save_path '/disk/u/rohit/www/bias/' --from_case 0 --till_case 10
