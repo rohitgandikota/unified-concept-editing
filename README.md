@@ -55,7 +55,7 @@ The preprint can be cited as follows
 @article{gandikota2023unified,
   title={Unified Concept Editing in Diffusion Models},
   author={Rohit Gandikota and Hadas Orgad and Yonatan Belinkov and Joanna Materzy\'nska and David Bau},
-  journal={arXiv preprint arXiv:2303.07345},
+  journal={arXiv preprint arXiv:2303.****},
   year={2023}
 }
 ```
