@@ -6,7 +6,7 @@ from PIL import Image
 import pandas as pd 
 import argparse
 import requests
-import os, glob
+import os, glob, json
 from transformers import CLIPProcessor, CLIPModel
 from diffusers import StableDiffusionPipeline
 import abc
@@ -324,7 +324,8 @@ if __name__ == '__main__':
     parser.add_argument('--technique', help='technique to erase (either replace or tensor)', type=str, required=False, default='replace')
     parser.add_argument('--device', help='cuda devices to train on', type=str, required=False, default='0')
     parser.add_argument('--base', help='base version for stable diffusion', type=str, required=False, default='1.4')
-    parser.add_argument('--preserve_scale', help='scale to preserve concepts', type=float, required=False, default=0.1)
+    parser.add_argument('--preserve_scale', help='scale to preserve concepts', type=float, required=False, default=None)
+    parser.add_argument('--preserve_number', help='number of preserve concepts', type=int, required=False, default=None)
     parser.add_argument('--erase_scale', help='scale to erase concepts', type=float, required=False, default=1)
     parser.add_argument('--concept_type', help='type of concept being erased', type=str, required=True)
     parser.add_argument('--add_prompts', help='option to add additional prompts', type=bool, required=False, default=False)
@@ -337,6 +338,7 @@ if __name__ == '__main__':
     add_prompts = args.add_prompts
     guided_concepts = args.guided_concepts
     preserve_concepts = args.preserve_concepts
+    preserve_number = args.preserve_number
     concepts = args.concepts.split(',')
     concepts = [con.strip() for con in concepts]
     concept_type = args.concept_type
@@ -349,7 +351,17 @@ if __name__ == '__main__':
         concepts = ["Kelly Mckernan", "Thomas Kinkade", "Pablo Picasso", "Tyler Edlin", "Kilian Eng"]
     if concepts[0] == 'i2g':
         concepts = ['hate', 'harassment', 'violence', 'suffering', 'humiliation', 'harm', 'suicide', 'sexual', 'nudity', 'bodily fluids', 'blood']
-    
+    if concepts[0] == '10artists':
+        concepts = ["Asger Jorn", "Eric Fischl", "Johannes Vermeer", "Apollinary Vasnetsov", "Naoki Urasawa", "Nicolas Mignard", "John Whitcomb", "John Constable", "Warwick Globe", "Albert Marquet"]
+    if concepts[0] == 'imagenette':
+        concepts = ['Cassette Player', 'Chain Saw', 'Church', 'Gas Pump', 'Tench', 'Garbage Truck', 'English Springer', 'Golf Ball', 'Parachute', 'French Horn']
+
+    if 'artists' in concepts[0]:
+        df = pd.read_csv('data/artists1734_prompts.csv')
+        artists = list(df.artist.unique())
+        number = int(concepts[0].replace('artists', ''))
+        concepts = random.sample(artists,number) 
+
     old_texts = []
     
     additional_prompts = []
@@ -401,13 +413,19 @@ if __name__ == '__main__':
             retain_texts = list(df.artist.unique())
             old_texts_lower = [text.lower() for text in old_texts]
             preserve_concepts = [text for text in retain_texts if text.lower() not in old_texts_lower]
-    retain_texts = preserve_concepts   
-    
-    if retain_texts is not None:
+            if preserve_number is not None:
+                print_text+=f'-preserving_{preserve_number}artists'
+                preserve_concepts = random.sample(preserve_concepts, preserve_number)
+        else:
+            preserve_concepts = []
+
+    retain_texts = ['']+preserve_concepts   
+    if len(retain_texts) > 1:
         print_text+=f'-preserve_true'     
     else:
         print_text+=f'-preserve_false'
-    
+    if preserve_scale is None:
+        preserve_scale = max(0.1, 1/len(retain_texts))
     sd14="CompVis/stable-diffusion-v1-4"
     sd21='stabilityai/stable-diffusion-2-1-base'
     if args.base=='1.4':
@@ -424,3 +442,5 @@ if __name__ == '__main__':
     ldm_stable = edit_model(ldm_stable= ldm_stable, old_text_= old_texts, new_text_=new_texts, add=False, retain_text_= retain_texts, lamb=0.5, erase_scale = erase_scale, preserve_scale = preserve_scale,  technique=technique)
     
     torch.save(ldm_stable.unet.state_dict(), f'models/erased-{print_text}.pt')
+    with open(f'info/erased-{print_text}.txt', 'w') as fp:
+        json.dump(concepts,fp)
