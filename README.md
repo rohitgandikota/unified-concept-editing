@@ -1,5 +1,5 @@
 # Unified Concept Editing in Diffusion Models
-###  [Project Website](https://unified.baulab.info) | [Arxiv Preprint](https://arxiv.org/pdf/2303.****.pdf)
+###  [Project Website](https://unified.baulab.info) | [Arxiv Preprint](https://arxiv.org/pdf/2308.14761.pdf)
 <div align='center'>
 <img src = 'images/intro.png'>
 </div>
@@ -55,7 +55,7 @@ The preprint can be cited as follows
 @article{gandikota2023unified,
   title={Unified Concept Editing in Diffusion Models},
   author={Rohit Gandikota and Hadas Orgad and Yonatan Belinkov and Joanna Materzy\'nska and David Bau},
-  journal={arXiv preprint arXiv:2303.****},
+  journal={arXiv preprint arXiv:2308.14761},
   year={2023}
 }
 ```
