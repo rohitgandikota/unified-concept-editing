@@ -1,0 +1,15 @@
+diffusers==0.20.2
+imageio==2.9.0
+lpips==0.1.4
+matplotlib==3.6.3
+NudeNet==2.0.9
+numpy==1.23.3
+pandas==1.5.1
+Pillow==9.2.0
+Pillow==10.0.1
+Requests==2.31.0
+sld==0.0.1
+torch==2.0.1
+torchvision==0.15.2
+tqdm==4.64.1
+transformers==4.27.4
