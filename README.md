@@ -24,29 +24,33 @@ pip install -r requirements.txt
 ## Training Guide
 
 After installation, follow these instructions to train a custom UCE model:
-### Erasing
-To erase concepts (e.g. "Kelly Mckernan, Sarah Anderson")
+### SDv1.4 and SDXL
+To erase concepts (e.g. "Van Gogh" and "Picasso" simultaneously) for SDv1.4
+```python
+python train-scripts/uce_sd_erase.py --model_id 'CompVis/stable-diffusion-v1-4' --erase_concepts 'Van Gogh, Picasso' --guided_concept 'art' --preserve_concepts 'Monet, Rembrandt, Warhol' --device 'cuda:0' --concept_type 'art' 
 ```
-python train-scripts/train_erase.py --concepts 'Kelly Mckernan, Sarah Anderson' --guided_concept 'art' --device 'cuda:0' --concept_type 'art'
+To erase concepts (e.g. "Van Gogh" and "Picasso" simultaneously) for SDXL
+```python
+python train-scripts/uce_sd_erase.py --model_id 'stabilityai/stable-diffusion-xl-base-1.0' --erase_concepts 'Van Gogh, Picasso' --guided_concept 'art' --preserve_concepts 'Monet, Rembrandt, Warhol' --device 'cuda:0' --concept_type 'art' 
+```
+
+### Moderating
+### SDv1.4 and SDXL
+To moderate concepts (e.g. "violence, nudity, harm")
+```python
+python train-scripts/uce_sd_erase.py --model_id 'CompVis/stable-diffusion-v1-4' --erase_concepts 'violence, nudity, harm' --device 'cuda:0' --concept_type 'unsafe'
 ```
 
 ### Debiasing
 To debias concepts (e.g. "Doctor, Nurse, Carpenter") against attributes (e.g. "Male, Female") 
-```
+```python
 python train-scripts/train_debias.py --concept 'Doctor, Nurse, Carpenter' --attributes 'male, female' --device 'cuda:0'
 ```
 
-### Moderating
-To moderate concepts (e.g. "violence, nudity, harm")
-```
-python train-scripts/train_erase.py --concepts 'violence, nudity, harm' --device 'cuda:0' --concept_type 'unsafe'
-```
-
 ## Generation Images
-
 To use `eval-scripts/generate-images.py` you would need a CSV file with columns `prompt`, `evaluation_seed`, and `case_number`. (Sample data in `data/`)
-```
-python eval-scripts/generate-images.py --model_name='erased-imagenette-towards_uncond-preserve_false-sd_1_4-method_replace.pt' --prompts_path 'data/imagenette.csv' --save_path 'evaluation_folder' --num_samples 5 --ddim_steps 50
+```python
+python eval-scripts/generate-images.py --model_id 'CompVis/stable-diffusion-v1-4' --uce_model_path 'uce_models/vangogh.safetensors' --prompts_path 'data/vangogh_prompts.csv' --save_path 'uce_results' --exp_name 'vangogh_uce' --num_images_per_prompt 1 --num_inference_steps 50 --device 'cuda:0'
 ```
 
 ## Citing our work
