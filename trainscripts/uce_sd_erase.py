@@ -10,6 +10,7 @@ from diffusers import DiffusionPipeline
 
 
 def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name):
+    start_time = time.time()
     # Prepare the cross attention weights required to do UCE
     uce_modules = []
     uce_module_names = []
@@ -22,7 +23,7 @@ def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, pr
 
     # collect text embeddings for erase concept and retain concepts
     uce_erase_embeds = {}
-    for e in erase_concepts + preserve_concepts:
+    for e in erase_concepts + guide_concepts + preserve_concepts:
         if e in uce_erase_embeds:
             continue
         t_emb = pipe.encode_prompt(prompt=e,
@@ -45,20 +46,8 @@ def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, pr
     for g in guide_concepts + preserve_concepts:
         if g in uce_guide_outputs:
             continue
-    
-        t_emb = pipe.encode_prompt(prompt=g,
-                                   device=device,
-                                   num_images_per_prompt=1,
-                                   do_classifier_free_guidance=False)
-    
-        last_token_idx = (pipe.tokenizer(g,
-                                          padding="max_length",
-                                          max_length=pipe.tokenizer.model_max_length,
-                                          truncation=True,
-                                          return_tensors="pt",
-                                         )['attention_mask']).sum()-2
-    
-        t_emb = t_emb[0][:,last_token_idx,:]
+            
+        t_emb = uce_erase_embeds[g]
         
         for module in original_modules:
             uce_guide_outputs[g] = uce_guide_outputs.get(g, []) + [module(t_emb)]
@@ -97,7 +86,9 @@ def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, pr
     for name, parameter in zip(uce_module_names, uce_modules):
         uce_state_dict[name+'.weight'] = parameter.weight
     save_file(uce_state_dict, os.path.join(save_dir, exp_name+'.safetensors'))
-
+    
+    end_time = time.time()
+    print(f'\n\nErased concepts using UCE\nModel edited in {end_time-start_time} seconds\n')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -162,7 +153,11 @@ if __name__ == '__main__':
     
 
     if expand_prompts == 'true':
-        for concept, guide_concept in zip(erase_concepts, preserve_concepts):
+        erase_concepts_ = copy.deepcopy(erase_concepts)
+        guide_concepts_ = copy.deepcopy(guide_concepts)
+        preserve_concepts_ = copy.deepcopy(preserve_concepts)
+            
+        for concept, guide_concept in zip(erase_concepts_, guide_concepts_):
             if concept_type == 'art':
                 erase_concepts.extend([f'painting by {concept}',
                                        f'art by {concept}',
@@ -171,13 +166,6 @@ if __name__ == '__main__':
                                        f'style of {concept}'
                                       ]
                                      )
-                preserve_concepts.extend([f'painting by {concept}',
-                                          f'art by {concept}',
-                                          f'artwork by {concept}',
-                                          f'picture by {concept}',
-                                          f'style of {concept}'
-                                         ]
-                                        )
             elif concept_type=='object':
                 erase_concepts.extend([f'image of {concept}',
                                        f'photo of {concept}',
@@ -186,21 +174,15 @@ if __name__ == '__main__':
                                        f'painting of {concept}'
                                       ]
                                      )
-                preserve_concepts.extend([f'image of {concept}',
-                                          f'photo of {concept}',
-                                          f'portrait of {concept}',
-                                          f'picture of {concept}',
-                                          f'painting of {concept}'
-                                         ]
-                                    )
                 
             guide_concepts.extend([guide_concept]*5)
 
+    print(f"\n\nErasing: {erase_concepts}\n")
+    print(f"Guiding: {guide_concepts}\n")
+    print(f"Preserving: {preserve_concepts}\n")
+    
     pipe = DiffusionPipeline.from_pretrained(model_id, 
                                              torch_dtype=torch_dtype, 
                                              safety_checker=None).to(device)
-    start_time = time.time()
-    UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name)
-    end_time = time.time()
     
-    print(f'\n\nErased concepts using UCE\nModel edited in {end_time-start_time} seconds\n')
+    UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name)
