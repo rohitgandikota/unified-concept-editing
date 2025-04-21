@@ -9,7 +9,7 @@ from safetensors.torch import save_file
 from diffusers import DiffusionPipeline
 
 
-def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name):
+def UCE(pipe, edit_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name):
     start_time = time.time()
     # Prepare the cross attention weights required to do UCE
     uce_modules = []
@@ -23,7 +23,7 @@ def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, pr
 
     # collect text embeddings for erase concept and retain concepts
     uce_erase_embeds = {}
-    for e in erase_concepts + guide_concepts + preserve_concepts:
+    for e in edit_concepts + guide_concepts + preserve_concepts:
         if e in uce_erase_embeds:
             continue
         t_emb = pipe.encode_prompt(prompt=e,
@@ -63,7 +63,7 @@ def UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, pr
         mat2 = lamb * torch.eye(w_old.shape[1], device = device, dtype=torch_dtype)  
     
         # Erase Concepts
-        for erase_concept, guide_concept in zip(erase_concepts, guide_concepts):
+        for erase_concept, guide_concept in zip(edit_concepts, guide_concepts):
             c_i = uce_erase_embeds[erase_concept].T
             v_i_star = uce_guide_outputs[guide_concept][module_idx].T
     
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     prog = 'TrainUCE',
                     description = 'UCE for erasing concepts in Stable Diffusion')
-    parser.add_argument('--erase_concepts', help='prompts corresponding to concepts to erase separated by ;', type=str, required=True)
+    parser.add_argument('--edit_concepts', help='prompts corresponding to concepts to erase separated by ;', type=str, required=True)
     parser.add_argument('--guide_concepts', help='Concepts to guide the erased concepts towards seperated by ;', type=str, default=None)
     parser.add_argument('--preserve_concepts', help='Concepts to preserve seperated by ;', type=str, default=None)
     parser.add_argument('--concept_type', help='type of concept being erased', choices=['art', 'object'], type=str, required=True)
@@ -131,7 +131,7 @@ if __name__ == '__main__':
         exp_name = 'uce_test'
 
     # erase concepts
-    erase_concepts = [concept.strip() for concept in args.erase_concepts.split(';')]
+    edit_concepts = [concept.strip() for concept in args.edit_concepts.split(';')]
     # guide concepts
     guide_concepts = args.guide_concepts 
     if guide_concepts is None:
@@ -140,8 +140,8 @@ if __name__ == '__main__':
             guide_concepts = 'art'
     guide_concepts = [concept.strip() for concept in guide_concepts.split(';')]
     if len(guide_concepts) == 1:
-        guide_concepts = guide_concepts*len(erase_concepts)
-    if len(guide_concepts) != len(erase_concepts):
+        guide_concepts = guide_concepts*len(edit_concepts)
+    if len(guide_concepts) != len(edit_concepts):
         raise Exception('Error! The length of erase concepts and their corresponding guide concepts do not match. Please make sure they are seperated by ; and are of equal sizes')
 
     # preserve concepts
@@ -153,36 +153,50 @@ if __name__ == '__main__':
     
 
     if expand_prompts == 'true':
-        erase_concepts_ = copy.deepcopy(erase_concepts)
+        edit_concepts_ = copy.deepcopy(edit_concepts)
         guide_concepts_ = copy.deepcopy(guide_concepts)
-        preserve_concepts_ = copy.deepcopy(preserve_concepts)
-            
-        for concept, guide_concept in zip(erase_concepts_, guide_concepts_):
+
+        for concept, guide_concept in zip(edit_concepts_, guide_concepts_):
             if concept_type == 'art':
-                erase_concepts.extend([f'painting by {concept}',
+                edit_concepts.extend([f'painting by {concept}',
                                        f'art by {concept}',
                                        f'artwork by {concept}',
                                        f'picture by {concept}',
                                        f'style of {concept}'
                                       ]
                                      )
-            elif concept_type=='object':
-                erase_concepts.extend([f'image of {concept}',
+                guide_concepts.extend([f'painting by {guide_concept}',
+                                       f'art by {guide_concept}',
+                                       f'artwork by {guide_concept}',
+                                       f'picture by {guide_concept}',
+                                       f'style of {guide_concept}'
+                                      ]
+                                     )
+
+            else:
+                edit_concepts.extend([f'image of {concept}',
                                        f'photo of {concept}',
                                        f'portrait of {concept}',
                                        f'picture of {concept}',
                                        f'painting of {concept}'
                                       ]
                                      )
-                
-            guide_concepts.extend([guide_concept]*5)
+                guide_concepts.extend([f'image of {guide_concept}',
+                                       f'photo of {guide_concept}',
+                                       f'portrait of {guide_concept}',
+                                       f'picture of {guide_concept}',
+                                       f'painting of {guide_concept}'
+                                      ]
+                                     )
 
-    print(f"\n\nErasing: {erase_concepts}\n")
+
+    print(f"\n\nErasing: {edit_concepts}\n")
     print(f"Guiding: {guide_concepts}\n")
     print(f"Preserving: {preserve_concepts}\n")
     
     pipe = DiffusionPipeline.from_pretrained(model_id, 
                                              torch_dtype=torch_dtype, 
-                                             safety_checker=None).to(device)
+                                             safety_checker=None,
+                                             vae=None).to(device)
     
-    UCE(pipe, erase_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name)
+    UCE(pipe, edit_concepts, guide_concepts, preserve_concepts, erase_scale, preserve_scale, lamb, save_dir, exp_name)
