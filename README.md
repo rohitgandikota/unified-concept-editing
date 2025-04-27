@@ -31,46 +31,46 @@ After installation, follow these instructions to train a custom UCE model:
 ### SDv1.4 and SDXL
 To erase concepts (e.g. "Van Gogh" and "Picasso" simultaneously) for SDv1.4
 ```python
-python train-scripts/uce_sd_erase.py --model_id 'CompVis/stable-diffusion-v1-4' --edit_concepts 'Van Gogh; Picasso' --guided_concept 'art' --preserve_concepts 'Monet; Rembrandt; Warhol' --device 'cuda:0' --concept_type 'art' --exp_name 'vangogh_uce_sd'
+python trainscripts/uce_sd_erase.py --model_id 'CompVis/stable-diffusion-v1-4' --edit_concepts 'Van Gogh; Picasso' --guided_concept 'art' --preserve_concepts 'Monet; Rembrandt; Warhol' --device 'cuda:0' --concept_type 'art' --exp_name 'vangogh_uce_sd'
 ```
 To erase concepts (e.g. "Van Gogh" and "Picasso" simultaneously) for SDXL
 ```python
-python train-scripts/uce_sd_erase.py --model_id 'stabilityai/stable-diffusion-xl-base-1.0' --edit_concepts 'Van Gogh, Picasso' --guided_concept 'art' --preserve_concepts 'Monet; Rembrandt; Warhol' --device 'cuda:0' --concept_type 'art' --exp_name 'vangogh_uce_sdxl'
+python trainscripts/uce_sd_erase.py --model_id 'stabilityai/stable-diffusion-xl-base-1.0' --edit_concepts 'Van Gogh, Picasso' --guided_concept 'art' --preserve_concepts 'Monet; Rembrandt; Warhol' --device 'cuda:0' --concept_type 'art' --exp_name 'vangogh_uce_sdxl'
 ```
 ### FLUX
 To erase concepts (e.g. "Van Gogh") for FLUX
 ```python
-python train-scripts/uce_flux_erase.py --model_id 'black-forest-labs/FLUX.1-schnell' --edit_concepts 'Van Gogh' --preserve_concepts 'Monet; Rembrandt; Warhol' --device 'cuda:0' --concept_type 'art' --exp_name 'vangogh_uce_flux'
+python trainscripts/uce_flux_erase.py --model_id 'black-forest-labs/FLUX.1-schnell' --edit_concepts 'Van Gogh' --preserve_concepts 'Monet; Rembrandt; Warhol' --device 'cuda:0' --concept_type 'art' --exp_name 'vangogh_uce_flux'
 ```
 ### HiDream-I1
 To edit concepts with HiDream-I1 (e.g. to enhance "mustache")
 ```python
-python train-scripts/uce_hidream_erase.py --edit_concepts 'person;man;woman' --preserve_concepts 'person with mustache;man with mustache;woman with mustache'--expand_prompts 'true' --device 'cuda:0' --concept_type 'object' --exp_name 'person_mustache_hidream'
+python trainscripts/uce_hidream_erase.py --edit_concepts 'person;man;woman' --preserve_concepts 'person with mustache;man with mustache;woman with mustache'--expand_prompts 'true' --device 'cuda:0' --concept_type 'object' --exp_name 'person_mustache_hidream'
 ```
 
 ### Moderating
 ### SDv1.4 and SDXL
 To moderate concepts (e.g. "violence, nudity, harm")
 ```python
-python train-scripts/uce_sd_erase.py --model_id 'CompVis/stable-diffusion-v1-4' --edit_concepts 'violence; nudity; harm' --device 'cuda:0' --concept_type 'unsafe' --exp_name 'i2p'
+python trainscripts/uce_sd_erase.py --model_id 'CompVis/stable-diffusion-v1-4' --edit_concepts 'violence; nudity; harm' --device 'cuda:0' --concept_type 'unsafe' --exp_name 'i2p'
 ```
 
 ### FLUX
 To moderate concepts (e.g. "violence, nudity, harm")
 ```python
-python train-scripts/uce_flux_erase.py --model_id 'black-forest-labs/FLUX.1-schnell' --edit_concepts 'violence; nudity; harm' --device 'cuda:0' --concept_type 'unsafe' --exp_name 'i2p_flux'
+python trainscripts/uce_flux_erase.py --model_id 'black-forest-labs/FLUX.1-schnell' --edit_concepts 'violence; nudity; harm' --device 'cuda:0' --concept_type 'unsafe' --exp_name 'i2p_flux'
 ```
 
 ### Debiasing
-To debias concepts (e.g. "Doctor, Nurse, Carpenter") against attributes (e.g. "Male, Female") 
+To debias concepts (e.g. "Doctor, Nurse, Carpenter") against attributes (e.g. "Male, Female") equally in 0.5 ratio each
 ```python
-python train-scripts/train_debias.py --concept 'Doctor; Nurse; Carpenter' --attributes 'male; female' --device 'cuda:0' '
+python trainscripts/uce_sd_debias.py --edit_concepts 'Doctor; Nurse; Carpenter' --debias_concepts 'male; female' --device 'cuda:0' --desired_ratios 0.5 0.5 --exp_name 'debias_sdxl' --model_id 'stabilityai/stable-diffusion-xl-base-1.0'
 ```
 
 ## Generation Images
 To use `eval-scripts/generate-images.py` you would need a CSV file with columns `prompt`, `evaluation_seed`, and `case_number`. (Sample data in `data/`)
 ```python
-python eval-scripts/generate-images.py --model_id 'CompVis/stable-diffusion-v1-4' --uce_model_path 'uce_models/vangogh.safetensors' --prompts_path 'data/vangogh_prompts.csv' --save_path 'uce_results' --exp_name 'vangogh_uce' --num_images_per_prompt 1 --num_inference_steps 50 --device 'cuda:0'
+python evalscripts/generate-images.py --model_id 'CompVis/stable-diffusion-v1-4' --uce_model_path 'uce_models/vangogh.safetensors' --prompts_path 'data/vangogh_prompts.csv' --save_path 'uce_results' --exp_name 'vangogh_uce' --num_images_per_prompt 1 --num_inference_steps 50 --device 'cuda:0'
 ```
 
 ## Citing our work
